@@ -5,19 +5,19 @@
 
 ## CVE Summary Table
 
-| CVE ID | Score | Severity | Description |
-|--------|-------|----------|-------------|
+| CVE ID         | Score | Severity | Description |
+|----------------|-------|----------|-------------|
 | CVE-2020-10148 | 9.8 | CRITICAL | The SolarWinds Orion API is vulnerable to an authentication bypass that could allow a remote attacker to execute API commands. |
 | CVE-2020-13169 | 9.0 | CRITICAL | Stored XSS (Cross-Site Scripting) exists in the SolarWinds Orion Platform before 2020.2.1 on multiple forms and pages. |
 | CVE-2020-14005 | 8.8 | HIGH | SolarWinds Orion (with Web Console WPM 2019.4.1, and Orion Platform HF4 or NPM HF2 2019.4) allows remote attackers to execute arbitrary code via Visual Basic scripts. |
 | CVE-2020-27869 | 8.8 | HIGH | Remote attackers can escalate privileges on affected installations of SolarWinds Network Performance Monitor via SQL injection. |
 | CVE-2020-27870 | 6.5 | MEDIUM | Remote attackers can disclose sensitive information on affected installations of SolarWinds Orion. |
 | CVE-2020-35856 | 4.8 | MEDIUM | SolarWinds Orion Platform before 2020.2.5 allows stored XSS attacks by an administrator on the Customize View page. |
-| CVE-2020-4006 | 9.1 | CRITICAL | VMware Workspace ONE Access, Access Connector, Identity Manager, and Identity Manager Connector command-injection vulnerability. |
+| CVE-2020-4006  | 9.1 | CRITICAL | VMware Workspace ONE Access, Access Connector, Identity Manager, and Identity Manager Connector command-injection vulnerability. |
 | CVE-2021-25274 | 9.8 | CRITICAL | The Collector Service in SolarWinds Orion Platform before 2020.2.4 uses MSMQ (Microsoft Message Queue) and doesn't securely deserialize messages — RCE. |
 | CVE-2021-25275 | 7.8 | HIGH | SolarWinds Orion Platform before 2020.2.4 installs and uses a SQL Server backend with insecurely stored credentials. |
 | CVE-2021-25276 | 7.1 | HIGH | In SolarWinds Serv-U before 15.2.2 Hotfix 1, a directory containing user profile files (including users' password hashes) has weak ACLs. |
-| CVE-2021-3109 | 4.8 | MEDIUM | The custom menu item options page in SolarWinds Orion Platform before 2020.2.5 allows Reverse Tabnabbing. |
+| CVE-2021-3109  | 4.8 | MEDIUM | The custom menu item options page in SolarWinds Orion Platform before 2020.2.5 allows Reverse Tabnabbing. |
 | CVE-2021-31474 | — | — | Insecure-deserialization RCE in SolarWinds NPM (no NVD enrichment returned). |
 | CVE-2021-31475 | — | — | RCE in Orion Job Scheduler via insecure deserialization (no NVD enrichment returned). |
 | CVE-2021-35211 | — | — | Memory-escape RCE in SolarWinds Serv-U SSH (no NVD enrichment returned). |

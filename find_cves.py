@@ -261,13 +261,15 @@ def render_markdown_table(rows: list[dict[str, Any]]) -> str:
     def cell(s: Any) -> str:
         return str(s).replace("|", "\\|").replace("\n", " ") if s not in (None, "") else "—"
 
+    cve_w = max(len("CVE ID"), max(len(r["cve_id"]) for r in rows))
+    header = "CVE ID".ljust(cve_w)
     lines = [
-        "| CVE ID | Score | Severity | Description |",
-        "|--------|-------|----------|-------------|",
+        f"| {header} | Score | Severity | Description |",
+        f"|{'-' * (cve_w + 2)}|-------|----------|-------------|",
     ]
     for r in rows:
         lines.append(
-            f"| {cell(r['cve_id'])} | {cell(r.get('score'))} | "
+            f"| {cell(r['cve_id']).ljust(cve_w)} | {cell(r.get('score'))} | "
             f"{cell(r.get('severity'))} | {cell(r.get('description'))} |"
         )
     return "\n".join(lines)
