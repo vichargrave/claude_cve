@@ -9,6 +9,7 @@ import os
 import re
 import sys
 import time
+from datetime import date
 from typing import Any
 
 import anthropic
@@ -245,6 +246,44 @@ def enrich_cve(cve_id: str) -> dict[str, Any]:
     }
 
 
+def slugify(text: str, max_len: int = 60) -> str:
+    """Turn an incident description into a filesystem-safe slug."""
+    s = re.sub(r"[^a-z0-9]+", "-", text.lower()).strip("-")
+    if len(s) > max_len:
+        s = s[:max_len].rstrip("-")
+    return s or "incident"
+
+
+def render_markdown_table(rows: list[dict[str, Any]]) -> str:
+    if not rows:
+        return "_No CVEs found._"
+
+    def cell(s: Any) -> str:
+        return str(s).replace("|", "\\|").replace("\n", " ") if s not in (None, "") else "—"
+
+    lines = [
+        "| CVE ID | Score | Severity | Description |",
+        "|--------|-------|----------|-------------|",
+    ]
+    for r in rows:
+        lines.append(
+            f"| {cell(r['cve_id'])} | {cell(r.get('score'))} | "
+            f"{cell(r.get('severity'))} | {cell(r.get('description'))} |"
+        )
+    return "\n".join(lines)
+
+
+def build_markdown_report(incident: str, rows: list[dict[str, Any]], report: str) -> str:
+    return (
+        f"# CVE Research: {incident}\n\n"
+        f"**Generated:** {date.today().isoformat()}\n\n"
+        "## CVE Summary\n\n"
+        f"{render_markdown_table(rows)}\n\n"
+        "## Research Report\n\n"
+        f"{report.strip()}\n"
+    )
+
+
 def render_table(rows: list[dict[str, Any]]) -> str:
     if not rows:
         return "No CVEs found."
@@ -280,6 +319,18 @@ def main() -> int:
         "--json",
         dest="json_path",
         help="Write full results (report + enriched CVEs + sources) to this JSON path",
+    )
+    parser.add_argument(
+        "--markdown",
+        dest="markdown_path",
+        nargs="?",
+        const="__auto__",
+        default=None,
+        help=(
+            "Write a markdown report (CVE table + research summary). "
+            "Pass a path to use it directly, or omit the value to auto-name "
+            "the file as <incident-slug>-<YYYY-MM-DD>.md in the cwd."
+        ),
     )
     parser.add_argument(
         "--no-enrich",
@@ -334,6 +385,14 @@ def main() -> int:
                 default=str,
             )
         print(f"\n[output] Wrote full results to {args.json_path}", file=sys.stderr)
+
+    if args.markdown_path:
+        md_path = args.markdown_path
+        if md_path == "__auto__":
+            md_path = f"{slugify(args.incident)}-{date.today().isoformat()}.md"
+        with open(md_path, "w") as f:
+            f.write(build_markdown_report(args.incident, rows, research["report"]))
+        print(f"\n[output] Wrote markdown report to {md_path}", file=sys.stderr)
 
     return 0
 

@@ -1,6 +1,6 @@
 ---
 description: Find CVEs discussed on the Internet related to a security incident
-argument-hint: "[incident description] [--json path] [--no-enrich]"
+argument-hint: "[incident description] [--json path] [--markdown [path]] [--no-enrich]"
 allowed-tools: Bash
 ---
 
