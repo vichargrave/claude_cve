@@ -268,8 +268,9 @@ def render_markdown_table(rows: list[dict[str, Any]]) -> str:
         f"|{'-' * (cve_w + 2)}|-------|----------|-------------|",
     ]
     for r in rows:
+        cve_cell = cell(r["cve_id"]).ljust(cve_w).replace("-", "‑")
         lines.append(
-            f"| {cell(r['cve_id']).ljust(cve_w)} | {cell(r.get('score'))} | "
+            f"| {cve_cell} | {cell(r.get('score'))} | "
             f"{cell(r.get('severity'))} | {cell(r.get('description'))} |"
         )
     return "\n".join(lines)
