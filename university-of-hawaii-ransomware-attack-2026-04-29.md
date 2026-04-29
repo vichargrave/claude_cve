@@ -4,9 +4,7 @@
 
 ## CVE Summary
 
-| CVE ID         | Score | Severity | Description |
-|----------------|-------|----------|-------------|
-| CVE‑2026‑32746 | 9.8 | CRITICAL | telnetd in GNU inetutils through 2.7 allows an out-of-bounds write in the LINEMODE SLC (Set Local Characters) suboption handler because add_slc does not check whether the buffer is full. |
+_No CVEs found._
 
 ## Research Report
 

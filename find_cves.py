@@ -21,6 +21,10 @@ load_dotenv()
 MODEL = "claude-opus-4-7"
 CVE_PATTERN = re.compile(r"CVE-\d{4}-\d{4,7}", re.IGNORECASE)
 URL_PATTERN = re.compile(r"https?://[^\s\)\]\}>'\"`,]+")
+ATTRIBUTED_JSON_PATTERN = re.compile(
+    r"```json\s*\n(\{.*?\"attributed_cves\".*?\})\s*\n```",
+    re.DOTALL,
+)
 NVD_API = "https://services.nvd.nist.gov/rest/json/cves/2.0"
 SERPER_API = "https://google.serper.dev/search"
 MAX_AGENT_TURNS = 12
@@ -30,17 +34,27 @@ SYSTEM_PROMPT = (
     "incident. Use the web_search tool (which queries Google via SERPER) to "
     "find articles, vendor advisories, blog posts, and public discussions "
     "about this incident on the Internet. Identify every CVE identifier "
-    "(format: CVE-YYYY-NNNN) that is discussed in connection with the "
-    "incident. Be thorough — issue several searches from different angles: "
-    "the vendor name, product names, the attack technique, the threat actor, "
-    "and any publicly reported indicators. After your research, produce a "
-    "concise report that:\n"
+    "(format: CVE-YYYY-NNNN) that is publicly discussed AS BEING USED IN OR "
+    "ATTRIBUTED TO this incident. Be thorough — issue several searches from "
+    "different angles: the vendor name, product names, the attack technique, "
+    "the threat actor, and any publicly reported indicators.\n\n"
+    "IMPORTANT: Distinguish between (a) CVEs publicly attributed to the "
+    "incident as the exploited vulnerability, and (b) CVEs that merely "
+    "co-occur on the same page, are named as background, or are explicitly "
+    "ruled out. Only group (a) counts as attributed.\n\n"
+    "After your research, produce a concise report that:\n"
     "  1. Summarizes what is publicly known about the incident.\n"
-    "  2. Lists every related CVE you found, each with a one-line note about "
-    "how it relates to the incident.\n"
-    "  3. Includes the source URL(s) where each CVE was discussed in a "
-    "parseable form (place URLs inline near the CVE they belong to).\n"
-    "If you find no CVEs after a thorough search, say so explicitly."
+    "  2. Discusses every related CVE you found, each with a one-line note "
+    "about how it relates to the incident, including the source URL(s).\n"
+    "  3. Ends with a fenced ```json``` code block of EXACTLY this shape, "
+    "listing ONLY CVEs publicly attributed to the incident itself (empty "
+    "list if none — do not include disclaimed or co-occurring CVEs):\n"
+    "```json\n"
+    '{\"attributed_cves\": [{\"cve_id\": \"CVE-YYYY-NNNN\", '
+    '\"sources\": [\"https://...\"]}]}\n'
+    "```\n"
+    "If you find no CVEs after a thorough search, the list must be empty "
+    "and the report must say so explicitly."
 )
 
 TOOLS: list[dict[str, Any]] = [
@@ -185,21 +199,49 @@ def research_cves(client: anthropic.Anthropic, incident: str) -> dict[str, Any]:
         b.text for b in response.content if getattr(b, "type", None) == "text"
     )
 
-    cve_to_urls: dict[str, set[str]] = {}
-    for cve in CVE_PATTERN.findall(report_text):
-        cve_to_urls.setdefault(cve.upper(), set())
+    cve_to_urls, clean_report = extract_attributed_cves(report_text)
 
-    for chunk in re.split(r"\n\s*\n|\n", report_text):
+    return {
+        "report": clean_report,
+        "cves": {cve: sorted(urls) for cve, urls in cve_to_urls.items()},
+        "stop_reason": response.stop_reason,
+    }
+
+
+def extract_attributed_cves(report_text: str) -> tuple[dict[str, set[str]], str]:
+    """Parse the trailing attributed_cves JSON block; return (cves, report_minus_block).
+
+    Falls back to scanning the prose only if the JSON block is missing or
+    malformed, so older runs still produce something. When the block is
+    present (the normal case), only CVEs Claude explicitly attributed to the
+    incident are returned — disclaimed or co-occurring CVEs in the prose are
+    excluded.
+    """
+    match = ATTRIBUTED_JSON_PATTERN.search(report_text)
+    clean_report = report_text
+    if match:
+        clean_report = (report_text[: match.start()] + report_text[match.end():]).rstrip() + "\n"
+        try:
+            data = json.loads(match.group(1))
+            cve_to_urls: dict[str, set[str]] = {}
+            for item in data.get("attributed_cves", []):
+                cve_id = str(item.get("cve_id", "")).upper()
+                if CVE_PATTERN.fullmatch(cve_id):
+                    cve_to_urls[cve_id] = {
+                        s for s in item.get("sources", []) if isinstance(s, str)
+                    }
+            return cve_to_urls, clean_report
+        except (json.JSONDecodeError, AttributeError, TypeError):
+            pass
+
+    # Fallback: legacy prose-scan when no structured block was emitted.
+    cve_to_urls = {}
+    for chunk in re.split(r"\n\s*\n|\n", clean_report):
         cves = {c.upper() for c in CVE_PATTERN.findall(chunk)}
         urls = URL_PATTERN.findall(chunk)
         for cve in cves:
             cve_to_urls.setdefault(cve, set()).update(urls)
-
-    return {
-        "report": report_text,
-        "cves": {cve: sorted(urls) for cve, urls in cve_to_urls.items()},
-        "stop_reason": response.stop_reason,
-    }
+    return cve_to_urls, clean_report
 
 
 def enrich_cve(cve_id: str) -> dict[str, Any]:
