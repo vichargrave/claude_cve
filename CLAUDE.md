@@ -49,5 +49,5 @@ Work must be committed to Git regularly and pushed to GitHub to ensure no loss o
 
 **Session-end safety net:**
 - A `SessionEnd` hook in `.claude/settings.local.json` runs on every Claude Code session exit. If the working tree is dirty, it stages all changes (`git add -A`), commits them with the message `"Auto-commit on Claude Code session end"`, and pushes if an upstream is configured (otherwise it prints `(no upstream — not pushing)` and exits cleanly).
-- The hook respects pre-commit hooks (no `--no-verify`). If a pre-commit hook rejects, the auto-commit fails and the changes remain in the working tree — fix and commit manually next session.
+- The hook bypasses pre-commit and pre-push hooks (`--no-verify` on both `git commit` and `git push`) so the auto-commit can never be rejected by a local hook. This is the catch-all safety net — run lint/test checks during the session, not at session end.
 - The hook is a backstop, not a substitute for the commit-frequently / push-regularly discipline above. Prefer creating meaningful, scoped commits during the session over relying on the catch-all auto-commit.
