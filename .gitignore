@@ -1,5 +1,7 @@
-.env
-venv/
 __pycache__/
-*.pyc
-.DS_Store
+*.py[cod]
+.venv/
+dist/
+*.egg-info/
+.env
+.claude/
