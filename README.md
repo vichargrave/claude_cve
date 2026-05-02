@@ -56,10 +56,10 @@ them:
 
 | Flag | Description |
 |------|-------------|
-| `--markdown [PATH]` | Write a markdown report (table + summary). Pass a path to use it directly, or omit the value to auto-name the file as `<incident-slug>-<YYYY-MM-DD>.md` in the current directory. |
-| `--json PATH` | Write the full structured result (incident, report, enriched CVEs, source URLs) as JSON. |
-| `--no-enrich` | Skip NVD enrichment. Faster, but you lose CVSS scores, severity, and descriptions. |
-| `-h`, `--help` | Show usage. |
+| `‑‑markdown [PATH]` | Write a markdown report (table + summary). Pass a path to use it directly, or omit the value to auto-name the file as `<incident-slug>-<YYYY-MM-DD>.md` in the current directory. |
+| `‑‑json PATH` | Write the full structured result (incident, report, enriched CVEs, source URLs) as JSON. |
+| `‑‑no‑enrich` | Skip NVD enrichment. Faster, but you lose CVSS scores, severity, and descriptions. |
+| `‑h`, `‑‑help` | Show usage. |
 
 ### Examples
 
