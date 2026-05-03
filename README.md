@@ -2,6 +2,8 @@
 
 A CVE research agent. Given a free‑form description of a security incident, it uses Claude (with Google search via [Serper](https://serper.dev)) to find every CVE publicly discussed in connection with the incident, enriches each CVE with NVD data (CVSS score, severity, description), and prints a table plus a narrative report with source URLs.
 
+The repo also ships a smaller companion tool, `lookup_cve.py`, for fetching a single CVE record from cve.org by ID — handy when you already know the identifier and just want the title, dates, summary, and full description.
+
 ## Requirements
 
 - Python 3.10+
@@ -123,6 +125,36 @@ For example:
 
 Claude will run `find_cves.py` for you and show the resulting table and report verbatim. If you also want a saved file, ask in the same turn — e.g. *"run /find-cves on Log4Shell and save the markdown report"* — and Claude will pass `--markdown` for you.
 
+## Looking up a single CVE
+
+When you already have a CVE identifier and just want the canonical record, use `lookup_cve.py`. It queries the official cve.org (MITRE CVE Services) API directly — no Anthropic or Serper key required, and no agentic loop.
+
+```bash
+./venv/bin/python lookup_cve.py CVE-2024-3094
+```
+
+Output fields, in order:
+
+- `ID` — the canonical CVE identifier
+- `Published` / `Updated` — timestamps from cve.org metadata
+- **`Title`** — the CNA-assigned title (rendered bold in a TTY)
+- `Summary` — the first sentence of the description, capped at 200 characters, for a quick at-a-glance read
+- `Description` — the full CNA description text
+
+Example:
+
+```bash
+$ ./venv/bin/python lookup_cve.py CVE-2024-3094
+ID: CVE-2024-3094
+Published: 2024-03-29T16:51:12.588Z
+Updated: 2025-11-20T07:17:48.594Z
+Title: Xz: malicious code in distributed source
+Summary: Malicious code was discovered in the upstream tarballs of xz, starting with version 5.6.0.
+Description: Malicious code was discovered in the upstream tarballs of xz, ...
+```
+
+The CVE ID must match the canonical `CVE-YYYY-NNNN+` format. Bold formatting is suppressed automatically when stdout is not a terminal, so piping or redirecting to a file produces clean plain text.
+
 ## Output
 
 The terminal output has two parts:
@@ -146,6 +178,7 @@ A markdown file written via `--markdown` contains the same two sections, plus a 
 
 - `find_cves.py` — the agent script
 - `find-cves` — bash wrapper that uses the venv's Python
+- `lookup_cve.py` — single-CVE lookup utility (cve.org / MITRE CVE Services API)
 - `.claude/commands/find-cves.md` — Claude Code slash-command definition
 - `requirements.txt` — Python dependencies
 - `.env.example` — template for required API keys

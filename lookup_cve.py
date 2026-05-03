@@ -21,6 +21,18 @@ def fetch_cve(cve_id: str) -> dict[str, Any]:
     return resp.json()
 
 
+def summarize(description: str, max_chars: int = 200) -> str:
+    """Return a short summary of the description: first sentence, capped at max_chars."""
+    if not description or description == "(no description)":
+        return description
+    text = description.strip()
+    match = re.search(r"[.!?](?:\s|$)", text)
+    summary = text[: match.end()].strip() if match else text
+    if len(summary) > max_chars:
+        summary = summary[: max_chars - 1].rstrip() + "…"
+    return summary
+
+
 def extract_fields(record: dict[str, Any]) -> dict[str, str]:
     meta = record.get("cveMetadata", {})
     containers = record.get("containers", {})
@@ -79,8 +91,15 @@ def main() -> int:
         return 1
 
     fields = extract_fields(record)
-    for key in ("ID", "Published", "Updated", "Title", "Description"):
+    bold = "\033[1m" if sys.stdout.isatty() else ""
+    reset = "\033[0m" if sys.stdout.isatty() else ""
+    summary = summarize(fields["Description"])
+
+    for key in ("ID", "Published", "Updated"):
         print(f"{key}: {fields[key]}")
+    print(f"{bold}Title: {fields['Title']}{reset}")
+    print(f"Summary: {summary}")
+    print(f"Description: {fields['Description']}")
     return 0
 
 
