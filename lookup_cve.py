@@ -114,21 +114,21 @@ def main() -> int:
     summary = summarize(fields["Description"])
 
     rows = [
-        ("ID", fields["ID"], False),
-        ("Published", fields["Published"], False),
-        ("Updated", fields["Updated"], False),
-        ("Title", fields["Title"], True),
-        ("Summary", summary, False),
-        ("Description", fields["Description"], False),
+        ("ID", fields["ID"], False, 30),
+        ("Published", fields["Published"], False, 30),
+        ("Updated", fields["Updated"], False, 30),
+        ("Title", fields["Title"], True, 30),
+        ("Summary", summary, False, 30),
+        ("Description", fields["Description"], False, 50),
     ]
 
-    value_width = 50
-    label_width = max(len(label) for label, _, _ in rows)
+    label_width = max(len(label) for label, _, _, _ in rows)
+    value_width = max(width for _, _, _, width in rows)
     sep = f"+{'-' * (label_width + 2)}+{'-' * (value_width + 2)}+"
 
     print(sep)
-    for label, value, is_bold in rows:
-        lines = textwrap.wrap(value, width=value_width) or [""]
+    for label, value, is_bold, width in rows:
+        lines = textwrap.wrap(value, width=width) or [""]
         for i, line in enumerate(lines):
             label_cell = (label if i == 0 else "").ljust(label_width)
             padding = " " * (value_width - len(line))
