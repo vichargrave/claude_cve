@@ -4,6 +4,7 @@
 import argparse
 import re
 import sys
+import textwrap
 from typing import Any
 
 import anthropic
@@ -112,11 +113,28 @@ def main() -> int:
     reset = "\033[0m" if sys.stdout.isatty() else ""
     summary = summarize(fields["Description"])
 
-    for key in ("ID", "Published", "Updated"):
-        print(f"{key}: {fields[key]}")
-    print(f"{bold}Title: {fields['Title']}{reset}")
-    print(f"Summary: {summary}")
-    print(f"Description: {fields['Description']}")
+    rows = [
+        ("ID", fields["ID"], False),
+        ("Published", fields["Published"], False),
+        ("Updated", fields["Updated"], False),
+        ("Title", fields["Title"], True),
+        ("Summary", summary, False),
+        ("Description", fields["Description"], False),
+    ]
+
+    value_width = 50
+    label_width = max(len(label) for label, _, _ in rows)
+    sep = f"+{'-' * (label_width + 2)}+{'-' * (value_width + 2)}+"
+
+    print(sep)
+    for label, value, is_bold in rows:
+        lines = textwrap.wrap(value, width=value_width) or [""]
+        for i, line in enumerate(lines):
+            label_cell = (label if i == 0 else "").ljust(label_width)
+            padding = " " * (value_width - len(line))
+            value_cell = f"{bold}{line}{reset}{padding}" if is_bold else line.ljust(value_width)
+            print(f"| {label_cell} | {value_cell} |")
+        print(sep)
     return 0
 
 
