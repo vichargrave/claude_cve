@@ -6,10 +6,22 @@ import re
 import sys
 from typing import Any
 
+import anthropic
 import requests
+from dotenv import load_dotenv
 
+load_dotenv()
+
+MODEL = "claude-opus-4-7"
 CVE_API = "https://cveawg.mitre.org/api/cve/{cve_id}"
 CVE_ID_RE = re.compile(r"^CVE-\d{4}-\d{4,}$", re.IGNORECASE)
+
+SUMMARY_SYSTEM = (
+    "You are a security analyst. Given a CVE description, produce a single "
+    "concise sentence (max 30 words) capturing the affected product, the "
+    "vulnerability type, and the impact. Output only the sentence — no "
+    "preamble, no quotes, no labels."
+)
 
 
 def fetch_cve(cve_id: str) -> dict[str, Any]:
@@ -21,16 +33,21 @@ def fetch_cve(cve_id: str) -> dict[str, Any]:
     return resp.json()
 
 
-def summarize(description: str, max_chars: int = 200) -> str:
-    """Return a short summary of the description: first sentence, capped at max_chars."""
+def summarize(description: str) -> str:
+    """Generate a brief, intelligent summary of the CVE description via Claude."""
     if not description or description == "(no description)":
         return description
-    text = description.strip()
-    match = re.search(r"[.!?](?:\s|$)", text)
-    summary = text[: match.end()].strip() if match else text
-    if len(summary) > max_chars:
-        summary = summary[: max_chars - 1].rstrip() + "…"
-    return summary
+    client = anthropic.Anthropic()
+    response = client.messages.create(
+        model=MODEL,
+        max_tokens=300,
+        system=SUMMARY_SYSTEM,
+        messages=[{"role": "user", "content": description.strip()}],
+    )
+    return next(
+        (b.text.strip() for b in response.content if b.type == "text"),
+        description,
+    )
 
 
 def extract_fields(record: dict[str, Any]) -> dict[str, str]:
