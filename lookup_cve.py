@@ -117,8 +117,8 @@ def main() -> int:
         ("ID", fields["ID"], False, 30),
         ("Published", fields["Published"], False, 30),
         ("Updated", fields["Updated"], False, 30),
-        ("Title", fields["Title"], True, 30),
-        ("Summary", summary, False, 30),
+        ("Title", fields["Title"], True, 75),
+        ("Summary", summary, False, 75),
         ("Description", fields["Description"], False, 75),
     ]
 
