@@ -119,7 +119,7 @@ def main() -> int:
         ("Updated", fields["Updated"], False, 30),
         ("Title", fields["Title"], True, 30),
         ("Summary", summary, False, 30),
-        ("Description", fields["Description"], False, 50),
+        ("Description", fields["Description"], False, 75),
     ]
 
     label_width = max(len(label) for label, _, _, _ in rows)
