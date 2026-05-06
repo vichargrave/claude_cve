@@ -111,14 +111,14 @@ def main() -> int:
     fields = extract_fields(record)
     bold = "\033[1m" if sys.stdout.isatty() else ""
     reset = "\033[0m" if sys.stdout.isatty() else ""
-    # summary = summarize(fields["Description"])
+    summary = summarize(fields["Description"])
 
     rows = [
         ("ID", fields["ID"], False, 30),
         ("Published", fields["Published"], False, 30),
         ("Updated", fields["Updated"], False, 30),
         ("Title", fields["Title"], True, 75),
-        # ("Summary", summary, False, 75),
+        ("Summary", summary, False, 75),
         ("Description", fields["Description"], False, 75),
     ]
 
