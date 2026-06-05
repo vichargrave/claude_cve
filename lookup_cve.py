@@ -68,12 +68,19 @@ def extract_fields(record: dict[str, Any]) -> dict[str, str]:
         if descs:
             description = descs[0].get("value", description)
 
+    references = []
+    for ref in cna.get("references", []) or []:
+        url = ref.get("url")
+        if url:
+            references.append(url)
+
     return {
         "ID": meta.get("cveId", "(unknown)"),
         "Published": meta.get("datePublished", "(unknown)"),
         "Updated": meta.get("dateUpdated", "(unknown)"),
         "Title": title,
         "Description": description,
+        "References": references,
     }
 
 
@@ -135,6 +142,15 @@ def main() -> int:
             value_cell = f"{bold}{line}{reset}{padding}" if is_bold else line.ljust(value_width)
             print(f"| {label_cell} | {value_cell} |")
         print(sep)
+
+    references = fields["References"]
+    print()
+    print(f"{bold}References{reset}")
+    if references:
+        for url in references:
+            print(f"  - {url}")
+    else:
+        print("  (none)")
     return 0
 
 
