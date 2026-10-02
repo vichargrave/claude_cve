@@ -16,13 +16,13 @@ The repo also ships a smaller companion tool, `lookup_cve.py`, for fetching a si
 
 To get a key:
 
-1. Sign up at [https://serper.dev](https://serper.dev).
+1. Sign up at https://serper.dev.
 2. Open the **API Key** page in the dashboard.
 3. Copy the key shown there. The free tier includes 2,500 queries, which is plenty for trying out this agent (each run typically issues 5–15 queries).
 
 ### Getting an Anthropic API key
 
-1. Sign in at [https://console.anthropic.com](https://console.anthropic.com).
+1. Sign in at https://console.anthropic.com.
 2. Go to **Settings → API Keys** and click **Create Key**.
 3. Copy the key — you won't be able to view it again after closing the dialog.
 
@@ -55,8 +55,7 @@ Notes:
 
 - No quotes, no spaces around the `=`, one key per line.
 - `.env` is git-ignored — keys stay on your machine and won't be committed.
-- The script loads `.env` automatically via `python-dotenv`; you don't need
-  to `export` the variables yourself.
+- The script loads `.env` automatically via `python-dotenv`; you don't need to `export` the variables yourself.
 
 To verify the keys are wired up correctly, run any quick query — e.g. `./find-cves "Log4Shell"`. If a key is missing or invalid the script will exit with an error pointing at the offending variable.
 
@@ -82,12 +81,12 @@ Progress (search queries, enrichment progress) is written to **stderr**; the fin
 
 ### Flags
 
-| Flag | Description |
-|------|-------------|
+| Flag                | Description                                                                                                                                                                       |
+| ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `‑‑markdown [PATH]` | Write a markdown report (table + summary). Pass a path to use it directly, or omit the value to auto-name the file as `<incident-slug>-<YYYY-MM-DD>.md` in the current directory. |
-| `‑‑json PATH` | Write the full structured result (incident, report, enriched CVEs, source URLs) as JSON. |
-| `‑‑no‑enrich` | Skip NVD enrichment. Faster, but you lose CVSS scores, severity, and descriptions. |
-| `‑h`, `‑‑help` | Show usage. |
+| `‑‑json PATH`       | Write the full structured result (incident, report, enriched CVEs, source URLs) as JSON.                                                                                          |
+| `‑‑no‑enrich`       | Skip NVD enrichment. Faster, but you lose CVSS scores, severity, and descriptions.                                                                                                |
+| `‑h`, `‑‑help`      | Show usage.                                                                                                                                                                       |
 
 ### Examples
 
@@ -123,7 +122,7 @@ For example:
 /find-cves MOVEit Transfer breach 2023
 ```
 
-Claude will run `find_cves.py` for you and show the resulting table and report verbatim. If you also want a saved file, ask in the same turn — e.g. *"run /find-cves on Log4Shell and save the markdown report"* — and Claude will pass `--markdown` for you.
+Claude will run `find_cves.py` for you and show the resulting table and report verbatim. If you also want a saved file, ask in the same turn — e.g. _"run /find-cves on Log4Shell and save the markdown report"_ — and Claude will pass `--markdown` for you.
 
 ## Looking up a single CVE
 
@@ -159,10 +158,8 @@ The CVE ID must match the canonical `CVE-YYYY-NNNN+` format. Bold formatting is 
 
 The terminal output has two parts:
 
-1. **CVE table** — one row per CVE, with CVSS score, severity, and a truncated
-   description.
-2. **Research summary** — Claude's narrative report, with source URLs inline
-   next to each CVE.
+1. **CVE table** — one row per CVE, with CVSS score, severity, and a truncated description.
+2. **Research summary** — Claude's narrative report, with source URLs inline next to each CVE.
 
 A markdown file written via `--markdown` contains the same two sections, plus a header line with the incident name and the generation date.
 

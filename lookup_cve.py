@@ -51,7 +51,7 @@ def summarize(description: str) -> str:
     )
 
 
-def extract_fields(record: dict[str, Any]) -> dict[str, str]:
+def extract_fields(record: dict[str, Any]) -> dict[str, Any]:
     meta = record.get("cveMetadata", {})
     containers = record.get("containers", {})
     cna = containers.get("cna", {}) or {}
